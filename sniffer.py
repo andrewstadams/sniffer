@@ -38,7 +38,50 @@ class Sniffer:
             self.report.append('- EtherType', 'Internet Protocol version 4 (IPv4)')
         elif next_protocol == '0806':
             self.report.append('- EtherType', 'Address Resolution Protocol (ARP)')
+            self.ARP(packet, cur+14)
         elif next_protocol == '86DD':
             self.report.append('- EtherType', 'Internet Protocol version 6 (IPv6)')
         else:
             self.report.append('- EtherType', 'Unregistered')
+
+    def ARP(self, packet:list, cur:int):
+        # Header Name
+        self.report.append('ARP', '')
+        # Hardware Type
+        temp = int(packet[cur+0].binary+packet[cur+1].binary, 2)
+        if temp == 1:
+            self.report.append('- Hardware Type', 'Ethernet (10Mb)')
+        elif temp == 2:
+            self.report.append('- Hardware Type', 'Experimental Ethernet (3Mb)')
+        else:
+            self.report.append('- Hardware Type', 'Unregistered')
+        # Protocol Type
+        temp = packet[cur+2].hexadecimal+packet[cur+3].hexadecimal
+        if temp == '0800':
+            self.report.append('- Protocol Type', 'Internet Protocol version 4 (IPv4)')
+        elif temp == '0806':
+            self.report.append('- Protocol Type', 'Address Resolution Protocol (ARP)')
+        elif temp == '86DD':
+            self.report.append('- Protocol Type', 'Internet Protocol version 6 (IPv6)')
+        else:
+            self.report.append('- Protocol Type', 'Unregistered')
+        # Hardware Address Length
+        self.report.append('- Hardware Address Length', packet[cur+4].decimal)
+        # Protocol Address Length
+        self.report.append('- Protocol Address Length', packet[cur+5].decimal)
+        # Operation Code
+        temp = int(packet[cur+6].binary+packet[cur+7].binary, 2)
+        if temp == 1:
+            self.report.append('- Operation Code', 'ARP Request')
+        elif temp == 2:
+            self.report.append('- Operation Code', 'ARP Reply')
+        else:
+            self.report.append('- Operation Code', 'Unregistered')
+        # Sender Hardware Address
+        self.report.append('- Sender Hardware Address', packet[cur+8].hexadecimal+':'+packet[cur+9].hexadecimal+':'+packet[cur+10].hexadecimal+':'+packet[cur+11].hexadecimal+':'+packet[cur+12].hexadecimal+':'+packet[cur+13].hexadecimal)
+        # Sender Protocol Address
+        self.report.append('- Sender Protocol Address', packet[cur+14].decimal+'.'+packet[cur+15].decimal+'.'+packet[cur+16].decimal+'.'+packet[cur+17].decimal)
+        # Target Hardware Address
+        self.report.append('- Target Hardware Address', packet[cur+18].hexadecimal+':'+packet[cur+19].hexadecimal+':'+packet[cur+20].hexadecimal+':'+packet[cur+21].hexadecimal+':'+packet[cur+22].hexadecimal+':'+packet[cur+23].hexadecimal)
+        # Target Protocol Address
+        self.report.append('- Target Protocol Address', packet[cur+24].decimal+'.'+packet[cur+25].decimal+'.'+packet[cur+26].decimal+'.'+packet[cur+27].decimal)
