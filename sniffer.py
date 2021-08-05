@@ -42,6 +42,7 @@ class Sniffer:
             self.ARP(packet, cur+14)
         elif next_protocol == '86DD':
             self.report.append('- EtherType', 'Internet Protocol version 6 (IPv6)')
+            self.IPv6(packet, cur+14)
         else:
             self.report.append('- EtherType', 'Unregistered')
 
@@ -192,6 +193,95 @@ class Sniffer:
         self.report.append('- Source IP Address', packet[cur+12].decimal+'.'+packet[cur+13].decimal+'.'+packet[cur+14].decimal+'.'+packet[cur+15].decimal)
         # Destination IP Address
         self.report.append('- Destination IP Address', packet[cur+16].decimal+'.'+packet[cur+17].decimal+'.'+packet[cur+18].decimal+'.'+packet[cur+19].decimal)
+        # Next Protocol
+        if next_protocol == 1:
+            pass
+        elif next_protocol == 6:
+            pass
+        elif next_protocol == 17:
+            pass
+        elif next_protocol == 58:
+            pass
+
+    def IPv6(self, packet:list, cur:int):
+        # Header Name
+        self.report.append('IPv6', '')
+        # Version
+        self.report.append('- Version', str(int(packet[cur+0].hexadecimal[0], 16)))
+        # Traffic Class
+        self.report.append('- Traffic Class', '')
+        ## Differentiated Services Code Point
+        self.report.append('-- Differentiated Services Code Point', '')
+        ### Precedence
+        temp = int(packet[cur+0].binary[4]+packet[cur+0].binary[5]+packet[cur+0].binary[6], 2)
+        if temp == 0:
+            self.report.append('--- Precedence', 'Routine')
+        elif temp == 1:
+            self.report.append('--- Precedence', 'Priority')
+        elif temp == 2:
+            self.report.append('--- Precedence', 'Immediate')
+        elif temp == 3:
+            self.report.append('--- Precedence', 'Flash')
+        elif temp == 4:
+            self.report.append('--- Precedence', 'Flash Override')
+        elif temp == 5:
+            self.report.append('--- Precedence', 'Critical')
+        elif temp == 6:
+            self.report.append('--- Precedence', 'Internetwork Control')
+        elif temp == 7:
+            self.report.append('--- Precedence', 'Network Control')
+        else:
+            self.report.append('--- Precedence', 'Unregistered')
+        ### Delay
+        temp = int(packet[cur+0].binary[7], 2)
+        if temp == 0:
+            self.report.append('--- Delay', 'Normal')
+        elif temp == 1:
+            self.report.append('--- Delay', 'Low')
+        else:
+            self.report.append('--- Delay', 'Unregistered')
+        ### Throughput
+        temp = int(packet[cur+1].binary[0], 2)
+        if temp == 0:
+            self.report.append('--- Throughput', 'Normal')
+        elif temp == 1:
+            self.report.append('--- Throughput', 'High')
+        else:
+            self.report.append('--- Throughput', 'Unregistered')
+        ### Reliability
+        temp = int(packet[cur+1].binary[1], 2)
+        if temp == 0:
+            self.report.append('--- Reliability', 'Normal')
+        elif temp == 1:
+            self.report.append('--- Reliability', 'High')
+        else:
+            self.report.append('--- Reliability', 'Unregistered')
+        ## Explicit Congestion Notification
+        self.report.append('-- Explicit Congestion Notification', '')
+        ### Reserved
+        self.report.append('--- Reserved', packet[cur+1].binary[2]+packet[cur+1].binary[3])
+        # Flow Label
+        self.report.append('- Flow Label', str(int(packet[cur+1].hexadecimal[1]+packet[cur+2].hexadecimal+packet[cur+3].hexadecimal, 16)))
+        # Payload Length
+        self.report.append('- Payload Length', str(int(packet[cur+4].binary+packet[cur+5].binary, 2)))
+        # Next Header
+        next_protocol = int(packet[cur+6].decimal)
+        if next_protocol == 1:
+            self.report.append('- Next Header', 'Internet Control Message Protocol version 4 (ICMPv4)')
+        elif next_protocol == 6:
+            self.report.append('- Next Header', 'Transmission Control Protocol (TCP)')
+        elif next_protocol == 17:
+            self.report.append('- Next Header', 'User Datagram Protocol (UDP)')
+        elif next_protocol == 58:
+            self.report.append('- Next Header', 'Internet Control Message Protocol version 6 (ICMPv6)')
+        else:
+            self.report.append('- Next Header', 'Unregistered')
+        # Hop Limit
+        self.report.append('- Hop Limit', packet[cur+7].decimal)
+        # Source IP Address
+        self.report.append('- Source IP Address', packet[cur+8].hexadecimal+packet[cur+9].hexadecimal+':'+packet[cur+10].hexadecimal+packet[cur+11].hexadecimal+':'+packet[cur+12].hexadecimal+packet[cur+13].hexadecimal+':'+packet[cur+14].hexadecimal+packet[cur+15].hexadecimal+':'+packet[cur+16].hexadecimal+packet[cur+17].hexadecimal+':'+packet[cur+18].hexadecimal+packet[cur+19].hexadecimal+':'+packet[cur+20].hexadecimal+packet[cur+21].hexadecimal+':'+packet[cur+22].hexadecimal+packet[cur+23].hexadecimal)
+        # Destination IP Address
+        self.report.append('- Destination IP Address', packet[cur+24].hexadecimal+packet[cur+25].hexadecimal+':'+packet[cur+26].hexadecimal+packet[cur+27].hexadecimal+':'+packet[cur+28].hexadecimal+packet[cur+29].hexadecimal+':'+packet[cur+30].hexadecimal+packet[cur+31].hexadecimal+':'+packet[cur+32].hexadecimal+packet[cur+33].hexadecimal+':'+packet[cur+34].hexadecimal+packet[cur+35].hexadecimal+':'+packet[cur+36].hexadecimal+packet[cur+37].hexadecimal+':'+packet[cur+38].hexadecimal+packet[cur+39].hexadecimal)
         # Next Protocol
         if next_protocol == 1:
             pass
