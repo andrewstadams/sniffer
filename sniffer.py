@@ -195,7 +195,7 @@ class Sniffer:
         self.report.append('- Destination IP Address', packet[cur+16].decimal+'.'+packet[cur+17].decimal+'.'+packet[cur+18].decimal+'.'+packet[cur+19].decimal)
         # Next Protocol
         if next_protocol == 1:
-            pass
+            self.ICMPv4(packet, cur+20)
         elif next_protocol == 6:
             pass
         elif next_protocol == 17:
@@ -284,10 +284,54 @@ class Sniffer:
         self.report.append('- Destination IP Address', packet[cur+24].hexadecimal+packet[cur+25].hexadecimal+':'+packet[cur+26].hexadecimal+packet[cur+27].hexadecimal+':'+packet[cur+28].hexadecimal+packet[cur+29].hexadecimal+':'+packet[cur+30].hexadecimal+packet[cur+31].hexadecimal+':'+packet[cur+32].hexadecimal+packet[cur+33].hexadecimal+':'+packet[cur+34].hexadecimal+packet[cur+35].hexadecimal+':'+packet[cur+36].hexadecimal+packet[cur+37].hexadecimal+':'+packet[cur+38].hexadecimal+packet[cur+39].hexadecimal)
         # Next Protocol
         if next_protocol == 1:
-            pass
+            self.ICMPv4(packet, cur+40)
         elif next_protocol == 6:
             pass
         elif next_protocol == 17:
             pass
         elif next_protocol == 58:
             pass
+
+    def ICMPv4(self, packet:list, cur:int):
+        # Control Messages
+        messages = {
+            '0': {
+                'name': 'Echo Reply',
+                '0'   : 'Echo reply (used to ping)'
+            },
+            '3': {
+                'name': 'Destination Unreachable',
+                '0'   : 'Destination network unreachable',
+                '1'   : 'Destination host unreachable'
+            },
+            '5': {
+                'name': 'Redirect Message',
+                '0'   : 'Redirect datagram for the network',
+                '1'   : 'Redirect datagram for the host'
+            },
+            '8': {
+                'name': 'Echo Request',
+                '0'   : 'Echo request (used to ping)'
+            },
+            '11': {
+                'name': 'Time Exceeded',
+                '0'   : 'TTL expired in transit',
+                '1'   : 'Fragment reassembly time exceeded'
+            }
+        }
+        # Header Name
+        self.report.append('ICMPv4', '')
+        # Type and Code
+        message_type, message_code = packet[cur+0].decimal, packet[cur+1].decimal
+        if message_type in messages.keys():
+            if message_code in messages[message_type].keys():
+                self.report.append('- Type', messages[message_type]['name'])
+                self.report.append('- Code', messages[message_type][message_code])
+            else:
+                self.report.append('- Type', messages[message_type]['name'])
+                self.report.append('- Code', 'Unregistered')
+        else:
+            self.report.append('- Type', 'Unregistered')
+            self.report.append('- Code', 'Unregistered')
+        # Checksum
+        self.report.append('- Checksum', packet[cur+2].hexadecimal+packet[cur+3].hexadecimal)
