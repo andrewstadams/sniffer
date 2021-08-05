@@ -201,7 +201,7 @@ class Sniffer:
         elif next_protocol == 17:
             pass
         elif next_protocol == 58:
-            pass
+            self.ICMPv6(packet, cur+20)
 
     def IPv6(self, packet:list, cur:int):
         # Header Name
@@ -290,7 +290,7 @@ class Sniffer:
         elif next_protocol == 17:
             pass
         elif next_protocol == 58:
-            pass
+            self.ICMPv6(packet, cur+40)
 
     def ICMPv4(self, packet:list, cur:int):
         # Control Messages
@@ -321,6 +321,65 @@ class Sniffer:
         }
         # Header Name
         self.report.append('ICMPv4', '')
+        # Type and Code
+        message_type, message_code = packet[cur+0].decimal, packet[cur+1].decimal
+        if message_type in messages.keys():
+            if message_code in messages[message_type].keys():
+                self.report.append('- Type', messages[message_type]['name'])
+                self.report.append('- Code', messages[message_type][message_code])
+            else:
+                self.report.append('- Type', messages[message_type]['name'])
+                self.report.append('- Code', 'Unregistered')
+        else:
+            self.report.append('- Type', 'Unregistered')
+            self.report.append('- Code', 'Unregistered')
+        # Checksum
+        self.report.append('- Checksum', packet[cur+2].hexadecimal+packet[cur+3].hexadecimal)
+
+    def ICMPv6(self, packet:list, cur:int):
+        # Control Messages
+        messages = {
+            '1': {
+                'name': 'Destination Unreachable',
+                '0'   : 'No route to destination',
+                '1'   : 'Communication with destination administratively prohibited'
+            },
+            '2': {
+                'name': 'Packet Too Big',
+                '0'   : 'No further information available'
+            },
+            '3': {
+                'name': 'Time Exceeded',
+                '0'   : 'Hop limit exceeded in transit',
+                '1'   : 'Fragment reassembly time exceeded'
+            },
+            '128': {
+                'name': 'Echo Request',
+                '0'   : 'No further information available'
+            },
+            '129': {
+                'name': 'Echo Reply',
+                '0'   : 'No further information available'
+            },
+            '133': {
+                'name': 'Router Solicitation',
+                '0'   : 'No further information available'
+            },
+            '134': {
+                'name': 'Router Advertisement',
+                '0'   : 'No further information available'
+            },
+            '135': {
+                'name': 'Neighbor Solicitation',
+                '0'   : 'No further information available'
+            },
+            '136': {
+                'name': 'Neighbor Advertisement',
+                '0'   : 'No further information available'
+            }
+        }
+        # Header Name
+        self.report.append('ICMPv6', '')
         # Type and Code
         message_type, message_code = packet[cur+0].decimal, packet[cur+1].decimal
         if message_type in messages.keys():
