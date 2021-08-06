@@ -197,7 +197,7 @@ class Sniffer:
         if next_protocol == 1:
             self.ICMPv4(packet, cur+20)
         elif next_protocol == 6:
-            pass
+            self.TCP(packet, cur+20)
         elif next_protocol == 17:
             pass
         elif next_protocol == 58:
@@ -286,7 +286,7 @@ class Sniffer:
         if next_protocol == 1:
             self.ICMPv4(packet, cur+40)
         elif next_protocol == 6:
-            pass
+            self.TCP(packet, cur+40)
         elif next_protocol == 17:
             pass
         elif next_protocol == 58:
@@ -394,3 +394,135 @@ class Sniffer:
             self.report.append('- Code', 'Unregistered')
         # Checksum
         self.report.append('- Checksum', packet[cur+2].hexadecimal+packet[cur+3].hexadecimal)
+
+    def TCP(self, packet:list, cur:int):
+        # Header Name
+        self.report.append('TCP', '')
+        next_protocol = None
+        # Source Port
+        temp = int(packet[cur+0].binary+packet[cur+1].binary, 2)
+        if 0 <= temp <= 1023:
+            next_protocol = temp
+            if temp == 53:
+                self.report.append('- Source Port', 'Well-known port ('+str(temp)+'): Domain Name System (DNS)')
+            elif temp == 80:
+                self.report.append('- Source Port', 'Well-known port ('+str(temp)+'): Hypertext Transfer Protocol (HTTP)')
+            elif temp == 443:
+                self.report.append('- Source Port', 'Well-known port ('+str(temp)+'): Hypertext Transfer Protocol Secure (HTTPS)')
+            else:
+                self.report.append('- Source Port', 'Well-known port ('+str(temp)+'): Unregistered')
+        elif 1024 <= temp <= 49151:
+            self.report.append('- Source Port', 'Registered port ('+str(temp)+')')
+        elif 49152 <= temp <= 65535:
+            self.report.append('- Source Port', 'Dynamic or private port ('+str(temp)+')')
+        else:
+            self.report.append('- Source Port', 'Unregistered port ('+str(temp)+')')
+        # Destination Port
+        temp = int(packet[cur+2].binary+packet[cur+3].binary, 2)
+        if 0 <= temp <= 1023:
+            next_protocol = temp
+            if temp == 53:
+                self.report.append('- Destination Port', 'Well-known port ('+str(temp)+'): Domain Name System (DNS)')
+            elif temp == 80:
+                self.report.append('- Destination Port', 'Well-known port ('+str(temp)+'): Hypertext Transfer Protocol (HTTP)')
+            elif temp == 443:
+                self.report.append('- Destination Port', 'Well-known port ('+str(temp)+'): Hypertext Transfer Protocol Secure (HTTPS)')
+            else:
+                self.report.append('- Destination Port', 'Well-known port ('+str(temp)+'): Unregistered')
+        elif 1024 <= temp <= 49151:
+            self.report.append('- Destination Port', 'Registered port ('+str(temp)+')')
+        elif 49152 <= temp <= 65535:
+            self.report.append('- Destination Port', 'Dynamic or private port ('+str(temp)+')')
+        else:
+            self.report.append('- Destination Port', 'Unregistered port ('+str(temp)+')')
+        # Sequence Number
+        self.report.append('- Sequence Number', str(int(packet[cur+4].binary+packet[cur+5].binary+packet[cur+6].binary+packet[cur+7].binary, 2)))
+        # Acknowledgment Number
+        self.report.append('- Acknowledgment Number', str(int(packet[cur+8].binary+packet[cur+9].binary+packet[cur+10].binary+packet[cur+11].binary, 2)))
+        # Header Length
+        self.report.append('- Header Length', packet[cur+12].hexadecimal[0])
+        # Reserved
+        self.report.append('- Reserved', packet[cur+12].binary[4]+packet[cur+12].binary[5]+packet[cur+12].binary[6])
+        # Control Flags
+        self.report.append('- Control Flags', '')
+        ## Nonce Sum (NS)
+        temp = int(packet[cur+12].binary[7], 2)
+        if temp == 0:
+            self.report.append('-- Nonce Sum (NS)', 'OFF')
+        elif temp == 1:
+            self.report.append('-- Nonce Sum (NS)', 'ON')
+        else:
+            self.report.append('-- Nonce Sum (NS)', 'Unregistered')
+        ## Congestion Window Reduced (CWR)
+        temp = int(packet[cur+13].binary[0], 2)
+        if temp == 0:
+            self.report.append('-- Congestion Window Reduced (CWR)', 'OFF')
+        elif temp == 1:
+            self.report.append('-- Congestion Window Reduced (CWR)', 'ON')
+        else:
+            self.report.append('-- Congestion Window Reduced (CWR)', 'Unregistered')
+        ## ECN Echo (ECE)
+        temp = int(packet[cur+13].binary[1], 2)
+        if temp == 0:
+            self.report.append('-- ECN Echo (ECE)', 'OFF')
+        elif temp == 1:
+            self.report.append('-- ECN Echo (ECE)', 'ON')
+        else:
+            self.report.append('-- ECN Echo (ECE)', 'Unregistered')
+        ## Urgent (URG)
+        temp = int(packet[cur+13].binary[2], 2)
+        if temp == 0:
+            self.report.append('-- Urgent (URG)', 'OFF')
+        elif temp == 1:
+            self.report.append('-- Urgent (URG)', 'ON')
+        else:
+            self.report.append('-- Urgent (URG)', 'Unregistered')
+        ## Acknowledgement (ACK)
+        temp = int(packet[cur+13].binary[3], 2)
+        if temp == 0:
+            self.report.append('-- Acknowledgement (ACK)', 'OFF')
+        elif temp == 1:
+            self.report.append('-- Acknowledgement (ACK)', 'ON')
+        else:
+            self.report.append('-- Acknowledgement (ACK)', 'Unregistered')
+        ## Push (PSH)
+        temp = int(packet[cur+13].binary[4], 2)
+        if temp == 0:
+            self.report.append('-- Push (PSH)', 'OFF')
+        elif temp == 1:
+            self.report.append('-- Push (PSH)', 'ON')
+        else:
+            self.report.append('-- Push (PSH)', 'Unregistered')
+        ## Reset (RST)
+        temp = int(packet[cur+13].binary[5], 2)
+        if temp == 0:
+            self.report.append('-- Reset (RST)', 'OFF')
+        elif temp == 1:
+            self.report.append('-- Reset (RST)', 'ON')
+        else:
+            self.report.append('-- Reset (RST)', 'Unregistered')
+        ## Synchronization (SYN)
+        temp = int(packet[cur+13].binary[6], 2)
+        if temp == 0:
+            self.report.append('-- Synchronization (SYN)', 'OFF')
+        elif temp == 1:
+            self.report.append('-- Synchronization (SYN)', 'ON')
+        else:
+            self.report.append('-- Synchronization (SYN)', 'Unregistered')
+        ## Finish (FIN)
+        temp = int(packet[cur+13].binary[7], 2)
+        if temp == 0:
+            self.report.append('-- Finish (FIN)', 'OFF')
+        elif temp == 1:
+            self.report.append('-- Finish (FIN)', 'ON')
+        else:
+            self.report.append('-- Finish (FIN)', 'Unregistered')
+        # Window Size
+        self.report.append('- Window Size', str(int(packet[cur+14].binary+packet[cur+15].binary, 2)))
+        # Checksum
+        self.report.append('- Checksum', packet[cur+16].hexadecimal+packet[cur+17].hexadecimal)
+        # Urgent Pointer
+        self.report.append('- Urgent Pointer', str(int(packet[cur+18].binary+packet[cur+19].binary, 2)))
+        # Next Protocol
+        if next_protocol == 53:
+            pass
