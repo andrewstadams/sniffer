@@ -199,7 +199,7 @@ class Sniffer:
         elif next_protocol == 6:
             self.TCP(packet, cur+20)
         elif next_protocol == 17:
-            pass
+            self.UDP(packet, cur+20)
         elif next_protocol == 58:
             self.ICMPv6(packet, cur+20)
 
@@ -288,7 +288,7 @@ class Sniffer:
         elif next_protocol == 6:
             self.TCP(packet, cur+40)
         elif next_protocol == 17:
-            pass
+            self.UDP(packet, cur+40)
         elif next_protocol == 58:
             self.ICMPv6(packet, cur+40)
 
@@ -523,6 +523,54 @@ class Sniffer:
         self.report.append('- Checksum', packet[cur+16].hexadecimal+packet[cur+17].hexadecimal)
         # Urgent Pointer
         self.report.append('- Urgent Pointer', str(int(packet[cur+18].binary+packet[cur+19].binary, 2)))
+        # Next Protocol
+        if next_protocol == 53:
+            pass
+
+    def UDP(self, packet:list, cur:int):
+        # Header Name
+        self.report.append('UDP', '')
+        next_protocol = None
+        # Source Port
+        temp = int(packet[cur+0].binary+packet[cur+1].binary, 2)
+        if 0 <= temp <= 1023:
+            next_protocol = temp
+            if temp == 53:
+                self.report.append('- Source Port', 'Well-known port ('+str(temp)+'): Domain Name System (DNS)')
+            elif temp == 80:
+                self.report.append('- Source Port', 'Well-known port ('+str(temp)+'): Hypertext Transfer Protocol (HTTP)')
+            elif temp == 443:
+                self.report.append('- Source Port', 'Well-known port ('+str(temp)+'): Hypertext Transfer Protocol Secure (HTTPS)')
+            else:
+                self.report.append('- Source Port', 'Well-known port ('+str(temp)+'): Unregistered')
+        elif 1024 <= temp <= 49151:
+            self.report.append('- Source Port', 'Registered port ('+str(temp)+')')
+        elif 49152 <= temp <= 65535:
+            self.report.append('- Source Port', 'Dynamic or private port ('+str(temp)+')')
+        else:
+            self.report.append('- Source Port', 'Unregistered port ('+str(temp)+')')
+        # Destination Port
+        temp = int(packet[cur+2].binary+packet[cur+3].binary, 2)
+        if 0 <= temp <= 1023:
+            next_protocol = temp
+            if temp == 53:
+                self.report.append('- Destination Port', 'Well-known port ('+str(temp)+'): Domain Name System (DNS)')
+            elif temp == 80:
+                self.report.append('- Destination Port', 'Well-known port ('+str(temp)+'): Hypertext Transfer Protocol (HTTP)')
+            elif temp == 443:
+                self.report.append('- Destination Port', 'Well-known port ('+str(temp)+'): Hypertext Transfer Protocol Secure (HTTPS)')
+            else:
+                self.report.append('- Destination Port', 'Well-known port ('+str(temp)+'): Unregistered')
+        elif 1024 <= temp <= 49151:
+            self.report.append('- Destination Port', 'Registered port ('+str(temp)+')')
+        elif 49152 <= temp <= 65535:
+            self.report.append('- Destination Port', 'Dynamic or private port ('+str(temp)+')')
+        else:
+            self.report.append('- Destination Port', 'Unregistered port ('+str(temp)+')')
+        # Length
+        self.report.append('- Length', packet[cur+4].hexadecimal+packet[cur+5].hexadecimal)
+        # Checksum
+        self.report.append('- Checksum', packet[cur+6].hexadecimal+packet[cur+7].hexadecimal)
         # Next Protocol
         if next_protocol == 53:
             pass
