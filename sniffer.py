@@ -525,7 +525,7 @@ class Sniffer:
         self.report.append('- Urgent Pointer', str(int(packet[cur+18].binary+packet[cur+19].binary, 2)))
         # Next Protocol
         if next_protocol == 53:
-            pass
+            self.DNS(packet, cur+20)
 
     def UDP(self, packet:list, cur:int):
         # Header Name
@@ -573,4 +573,90 @@ class Sniffer:
         self.report.append('- Checksum', packet[cur+6].hexadecimal+packet[cur+7].hexadecimal)
         # Next Protocol
         if next_protocol == 53:
-            pass
+            self.DNS(packet, cur+8)
+
+    def DNS(self, packet:list, cur:int):
+        # Header Name
+        self.report.append('DNS', '')
+        # Identifier (ID)
+        self.report.append('- Identifier (ID)', packet[cur+0].hexadecimal+packet[cur+1].hexadecimal)
+        # Flags and Codes
+        self.report.append('- Flags and Codes', '')
+        ## Query or Response (QR)
+        temp = int(packet[cur+2].binary[0], 2)
+        if temp == 0:
+            self.report.append('-- Query or Response (QR)', 'Query')
+        elif temp == 1:
+            self.report.append('-- Query or Response (QR)', 'Response')
+        else:
+            self.report.append('-- Query or Response (QR)', 'Unregistered')
+        ## Operation Code (Opcode)
+        temp = int(packet[cur+2].binary[1]+packet[cur+2].binary[2]+packet[cur+2].binary[3]+packet[cur+2].binary[4], 2)
+        if temp == 0:
+            self.report.append('-- Operation Code (Opcode)', 'Standard Query (QUERY)')
+        elif temp == 1:
+            self.report.append('-- Operation Code (Opcode)', 'Inverse Query (IQUERY)')
+        elif temp == 2:
+            self.report.append('-- Operation Code (Opcode)', 'Status Request (STATUS)')
+        else:
+            self.report.append('-- Operation Code (Opcode)', 'Unregistered')
+        ## Authoritative Answer (AA)
+        temp = int(packet[cur+2].binary[5], 2)
+        if temp == 0:
+            self.report.append('-- Authoritative Answer (AA)', 'Non-authoritative answer')
+        elif temp == 1:
+            self.report.append('-- Authoritative Answer (AA)', 'Authoritative answer')
+        else:
+            self.report.append('-- Authoritative Answer (AA)', 'Unregistered')
+        ## Truncation (TC)
+        temp = int(packet[cur+2].binary[6], 2)
+        if temp == 0:
+            self.report.append('-- Truncation (TC)', 'Non-truncated message')
+        elif temp == 1:
+            self.report.append('-- Truncation (TC)', 'Truncated message')
+        else:
+            self.report.append('-- Truncation (TC)', 'Unregistered')
+        ## Recursion Desired (RD)
+        temp = int(packet[cur+2].binary[7], 2)
+        if temp == 0:
+            self.report.append('-- Recursion Desired (RD)', 'Recursion not desired')
+        elif temp == 1:
+            self.report.append('-- Recursion Desired (RD)', 'Recursion desired')
+        else:
+            self.report.append('-- Recursion Desired (RD)', 'Unregistered')
+        ## Recursion Available (RA)
+        temp = int(packet[cur+3].binary[0], 2)
+        if temp == 0:
+            self.report.append('-- Recursion Available (RA)', 'Recursion not available')
+        elif temp == 1:
+            self.report.append('-- Recursion Available (RA)', 'Recursion available')
+        else:
+            self.report.append('-- Recursion Available (RA)', 'Unregistered')
+        ## Zero (Z)
+        self.report.append('-- Zero (Z)', packet[cur+3].binary[1]+packet[cur+3].binary[2]+packet[cur+3].binary[3])
+        ## Response Code (RCODE)
+        temp = int(packet[cur+3].hexadecimal[1], 16)
+        if temp == 0:
+            self.report.append('-- Response Code (RCODE)', 'No error condition')
+        elif temp == 1:
+            self.report.append('-- Response Code (RCODE)', 'Format error')
+        elif temp == 2:
+            self.report.append('-- Response Code (RCODE)', 'Server failure')
+        elif temp == 3:
+            self.report.append('-- Response Code (RCODE)', 'Name error')
+        elif temp == 4:
+            self.report.append('-- Response Code (RCODE)', 'Not implemented')
+        elif temp == 5:
+            self.report.append('-- Response Code (RCODE)', 'Refused')
+        else:
+            self.report.append('-- Response Code (RCODE)', 'Unregistered')
+        # Counters
+        self.report.append('- Counters', '')
+        ## Question (QDCOUNT)
+        self.report.append('-- Question (QDCOUNT)', str(int(packet[cur+4].binary+packet[cur+5].binary, 2)))
+        ## Answer (ANCOUNT)
+        self.report.append('-- Answer (ANCOUNT)', str(int(packet[cur+6].binary+packet[cur+7].binary, 2)))
+        ## Authority (NSCOUNT)
+        self.report.append('-- Authority (NSCOUNT)', str(int(packet[cur+8].binary+packet[cur+9].binary, 2)))
+        ## Additional (ARCOUNT)
+        self.report.append('-- Additional (ARCOUNT)', str(int(packet[cur+10].binary+packet[cur+11].binary, 2)))
